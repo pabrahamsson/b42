@@ -1,0 +1,72 @@
+---
+tags: ["dd-wrt", "netgear", "nighthawk", "r7500"]
+title: Installing dd-wrt on Netgear Nighthawk R7500v2
+date: 2018-11-22
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+== Introduction
+A while back I purchased a Netgear Nighthawk R7500 to replace the TP-Link that had started showing signs of old age and would have to be restarted more and more frequently.
+Below I'll go through the steps on how to replace the factory firmware with DD-WRT (Kong mod) firmware.
+
+== DD-WRT
+[quote, http://dd-wrt.com]
+____
+DD-WRT is a Linux based alternative OpenSource firmware suitable for a great variety of WLAN routers and embedded systems. The main emphasis lies on providing the easiest possible handling while at the same time supporting a great number of functionalities within the framework of the respective hardware platform used.
+____
+
+However, in this post I'll use modified version of stock dd-wrt called Kong.
+[quote, http://www.desipro.de/ddwrt/Readme.txt]
+____
+-Builds receive additional testing before upload
+
+-Builds can be upgraded through commandline tool ddup (currently only northstar). 
+ See: ddup --help
+
+-Builds and packages are cryptographically signed in order to verify authenticity
+
+-Builds sometimes contain hotfixes that are not yet included in regular builds until
+ a universal solution has been developed
+
+-Builds contain a tool called bootstrap that installs a package manager called opkg 
+ in order to install additional features.
+____
+
+== Installation
+The necessary file(s) do download can be found at http://www.desipro.de/ddwrt/K3-AC-IPQ806X/[http://www.desipro.de/ddwrt/K3-AC-IPQ806X/] and in our case it's the file http://www.desipro.de/ddwrt/K3-AC-IPQ806X/R7500v2-factory-to-ddwrt.img[R7500v2-factory-to-ddwrt.img]. +
+It might also be a good idea to download and save http://www.desipro.de/ddwrt/K3-AC-IPQ806X/NetgearFW/ddwrt-to-netgear-R7500v2.bin[NetgearFW/ddwrt-to-netgear-R7500v2.bin] in case you want to revert back to stock Netgear firmware. +
+{nbsp} +
+Armed with the necessary file the next steps are:
+
+1. Log into your router's web ui.
+2. Go to `Advanced` -> `Administration` -> `Router Update`.
+3. Click on `Browse` and select the downloaded `R7500v2-factory-to-ddwrt.img` file.
+4. Click the `Upload` button.
+5. You might see some warnings about this being and older version than the currently installed. This is expected and can safely be ignored.
+6. Once completed your router will reboot and you will be disconnected.
+
+== First login
+Depending on how you're connecting to your network the next step might vary.
+
+=== Wired connection
+
+1. Open your browser and go to http://192.168.1.1
+2. You'll be prompted to create a new user.
+3. Fill out username and password (twice).
+4. Use the web UI to configure your router.
+
+=== Wireless connection
+
+1. Connect to the `dd-wrt` wireless network.
+2. The password is your router's factory password, usually found on the router itself.
+3. Open your browser and go to http://192.168.1.1
+4. You'll be prompted to create a new user.
+5. Fill out username and password (twice).
+6. Use the web UI to configure your router.
+
+== Configuration
+The dd-wrt web UI is pretty intuitive and easy to use. +
+If you need help or want to learn more about what can be done with dd-wrt, head over to the https://wiki.dd-wrt.com/wiki/index.php/Main_Page[Official Wiki].

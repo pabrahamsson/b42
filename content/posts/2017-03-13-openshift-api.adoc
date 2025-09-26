@@ -1,0 +1,579 @@
+---
+date: 2017-03-13
+title: OpenShift API examples
+tags: ["openshift", "api"]
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+OpenShift API examples
+======================
+Petter Abrahamsson <petter@redhat.com>
+v1.4, March 13 2017
+:toc:
+
+OpenShift API requests
+----------------------
+OpenShift reuses the API exposed by Kubernetes at `/api/v1` and has
+OpenShift specific endpoints exposed at `/oapi/v1`. +
+Both APIs will require a valid token, which can be obtained from a
+user or service account with proper permissions on the desired
+project.
+
+User account
+~~~~~~~~~~~~
+[source,shell]
+----
+$ oc login -u user1 https://<ose-master>:8443
+$ oc whoami -t > token.txt
+$ cat token.txt
+YrxrxRxiZOGRXCyBhWrWvqly7NsOY0T0du2jpRHqzA
+----
+
+Service account
+~~~~~~~~~~~~~~~
+[source,shell]
+----
+$ oc create serviceaccount api
+$ oc policy add-role-to-user edit system:serviceaccount:project1:api
+$ oc describe serviceaccount api|grep Tokens
+Tokens:             api-token-iy0x2
+$ oc describe secret api-token-iy0x2 | grep '^token' | awk '{print
+$2}' > token.txt
+$ cat token.txt
+***REMOVED***
+----
+
+Without the oc client
+~~~~~~~~~~~~~~~~~~~~~
+[source,shell]
+----
+$ curl -u myuser:mypassword -ksIl 'https://127.0.0.1:8443/oauth/authorize?client_id=openshift-challenging-client&response_type=token' | grep ^Location
+Location: https://10.1.2.2:8443/oauth/token/implicit#*access_token=CdmUsE5xG-_bwMdYlaoyVF6Ks25RkMRt4pPDXSl2C8U*&expires_in=86400&token_type=Bearer
+----
+The token can then be used as follows for authenticating to the API.
+[source,shell]
+----
+curl -H "Authorization: Bearer $(cat token.txt)" https://.....
+----
+
+Secrets
+-------
+
+Create secrets
+~~~~~~~~~~~~~~
+[source,shell]
+----
+$ echo -n 's3cr3t!' | base64 > secret.txt
+$ cat secret.txt
+czNjcjN0IQ==
+----
+Define your secret object.
+[source%linenums,json]
+.secret.json
+----
+{
+  "kind": "Secret",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "foobar",
+    "namespace": "project1"
+  },
+  "data": {
+    "password": "czNjcjN0IQ=="
+  },
+  "type": "kubernetes.io/basic-auth"
+}
+----
+
+Create the secret.
+[source%linenums,json]
+.POST /api/v1/namespaces/<project>/secrets
+----
+{
+  "kind": "Secret",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "foobar",
+  },
+  "data": {
+    "password": "czNjcjN0IQ=="
+  },
+  "type": "kubernetes.io/basic-auth"
+}
+----
+
+Retreive the created secret.
+[source%linenums,json]
+.GET /api/v1/namespaces/<project>/secrets/foobar
+----
+{
+  "kind": "Secret",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "foobar",
+    "namespace": "<project>",
+    "selfLink": "/api/v1/namespaces/<project>/secrets/foobar",
+    "uid": "faf4cffe-f48d-11e6-bade-525400ec71c5",
+    "resourceVersion": "2708",
+    "creationTimestamp": "2017-02-16T21:22:11Z"
+  },
+  "data": {
+    "password": "czNjcjN0IQ=="
+  },
+  "type": "kubernetes.io/basic-auth"
+}
+----
+
+Mount secret to a pod
+~~~~~~~~~~~~~~~~~~~~~
+This can be done by adding/updating the deploymentconfig with the
+desired volume and secret. The example below will mount `app-secrets` under `/app-secrets` inside the
+container.
+[source%linenums,json]
+.PUT /oapi/v1/namespaces/<project>/deploymentconfigs/<deploymentconfig>
+----
+{
+  "kind": "DeploymentConfig",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "myapp",
+    "resourceVersion":"117464", //<1>
+    "labels": {
+      "app": "myapp"
+    }
+  },
+  "spec": {
+    "strategy": {
+      "type": "Rolling",
+      "rollingParams": {
+        "updatePeriodSeconds": 1,
+        "intervalSeconds": 1,
+        "timeoutSeconds": 600,
+        "maxUnavailable": "25%",
+        "maxSurge": "25%"
+      },
+      "resources": {}
+    },
+    "triggers": [
+      {
+        "type": "ConfigChange"
+      },
+      {
+        "type": "ImageChange",
+        "imageChangeParams": {
+          "automatic": true,
+          "containerNames": ["myapp"],
+          "from": {
+            "kind": "ImageStreamTag",
+            "namespace": "api",
+            "name": "myapp:latest"
+          }
+        }
+      }
+    ],
+    "replicas": 1,
+    "test": false,
+    "selector": {
+      "app": "myapp",
+      "deploymentconfig": "myapp"
+    },
+    "template": {
+      "metadata": {
+        "creationTimestamp": null,
+        "labels": {
+          "app": "myapp",
+          "deploymentconfig": "myapp"
+        },
+        "annotations": {
+          "openshift.io/container.myapp.image.entrypoint": "[\"httpd-foreground\"]"
+        }
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "volume-app-secrets",
+            "secret": {
+              "secretName": "app-secrets"
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "myapp",
+            "image": "172.30.147.195:5000/api/myapp@sha256:248cf318188bda2cb65b345fd85e31662078e73a92e45a4242b989f6064fcbbd",
+            "ports": [
+              {
+                "containerPort": 80,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "volume-app-secrets",
+                "mountPath": "/app-secrets"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "securityContext": {}
+      }
+    }
+  },
+  "status": {
+    "latestVersion": 2, //<2>
+    "details": {
+      "causes": [
+        {
+          "type": "ConfigChange"
+        }
+      ]
+    }
+  }
+}
+----
+<1> Ensure the `resourceVersion` matches what's currently deployed.
+<2> Increase `latestVersion`, typically by one.
+
+Add a secret to a service account
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[source%linenums,json]
+.PUT /api/v1/namespaces/<project>/serviceaccounts/<service-account>
+----
+{
+  "kind": "ServiceAccount",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "default",
+    "namespace":"api",
+    "resourceVersion":"117340", //<1>
+  },
+  "secrets": [
+    {
+      "name": "default-token-912kc"
+    },
+    {
+      "name": "default-dockercfg-0k6os"
+    },
+    {
+      "name": "app-secrets" //<2>
+    }
+  ],
+  "imagePullSecrets": [
+    {
+      "name": 
+        "default-dockercfg-0k6os"
+    }
+  ]
+}
+----
+<1> Ensure the `resourceVersion` matches what's currently deployed.
+<2> The secret to be added
+
+Create a docker pull secret
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This can be done by creating a new secret object.
+[source%linenums,json]
+.POST /api/v1/namespaces/<project>/secrets
+----
+{
+  "kind": "Secret",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "172.30.147.195"
+  },
+  "data": {
+    ".dockercfg":
+"eyIxNzIuMzAuMTQ3LjE5NTo1MDAwIjp7InVzZXJuYW1lIjoiRE9DS0VSX1VTRVIiLCJwYXNzd29yZCI6IkRPQ0tFUl9QQVNTV09SRCIsImVtYWlsIjoiRE9DS0VSX0VNQUlMIiwiYXV0aCI6IlJFOURTMFZTWDFWVFJWSTZSRTlEUzBWU1gxQkJVMU5YVDFKRSJ9fQ==" //<1>
+  },
+  "type": "kubernetes.io/dockercfg"
+}
+----
+<1> The secret string has to be base64 encoded
+
+Let's also take a closer look at what the `.dockercfg` object actually
+looks like.
+[source,shell]
+----
+echo -n
+'eyIxNzIuMzAuMTQ3LjE5NTo1MDAwIjp7InVzZXJuYW1lIjoiRE9DS0VSX1VTRVIiLCJwYXNzd29yZCI6IkRPQ0tFUl9QQVNTV09SRCIsImVtYWlsIjoiRE9DS0VSX0VNQUlMIiwiYXV0aCI6IlJFOURTMFZTWDFWVFJWSTZSRTlEUzBWU1gxQkJVMU5YVDFKRSJ9fQ=='
+|base64 -d | jq .
+{
+  "172.30.147.195:5000": {
+    "username": "DOCKER_USER",
+    "password": "DOCKER_PASSWORD",
+    "email": "DOCKER_EMAIL",
+    "auth": "RE9DS0VSX1VTRVI6RE9DS0VSX1BBU1NXT1JE" //<1>
+  }
+}
+----
+<1> The `auth` field is a base64 encoded string of your `{username}:{password}`
+
+Add docker pull secret to a service account
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is very similar to adding a generic secret to a service account.
+[source%linenums,json]
+.PUT /api/v1/namespaces/<project>/serviceaccounts/<service-account>
+----
+{
+  "kind": "ServiceAccount",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "default",
+    "namespace":"api",
+    "resourceVersion": "145123" //<1>
+  },
+  "secrets": [
+    {
+      "name": "default-token-912kc"
+    },
+    {
+      "name": "default-dockercfg-0k6os"
+    },
+    {
+      "name": "app-secrets"
+    }
+  ],
+  "imagePullSecrets": [
+    {
+      "name": "default-dockercfg-0k6os"
+    },
+    {
+      "name": "172.30.147.195" //<2>
+    }
+  ]
+}
+----
+<1> Ensure the `resourceVersion` matches what's currently deployed.
+<2> The secret to be added
+
+Patching an object
+------------------
+The API(s) support the HTTP `PATCH` method which can be very
+convenient when updating larger objects. It's important to notice that
+the `Content-Type` header should be
+`application/strategic-merge-patch+json` for this to work. +
+Below is an example of how to re-deploy an application by incrementing
+`{"status":{"latestVersion":_}}`.
+
+. Get the current value of `latestVersion`.
++
+[source%linenums,json]
+.GET /oapi/v1/namespaces/<project>/deploymentconfigs/<deploymentconfig>
+----
+{
+...
+  "status": {
+    "latestVersion": 1
+  }
+}
+----
+. Send the patch request
++
+[source%linenums,json]
+.PATCH /oapi/v1/namespaces/<project>/deploymentconfigs/<deploymentconfig>
+----
+{
+  "status": {
+    "latestVersion": 2 //<1>
+  }
+}
+----
+<1> Increment `latestVersion` by one.
+
+Create a new Route object
+-------------------------
+[source%linenums,json]
+.POST /oapi/v1/namespaces/<project>/routes
+----
+{
+  "kind": "Route",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "myapp",
+    "labels": {
+      "app": "myapp"
+    }
+  },
+  "spec": {
+    "host":"",
+    "to": {
+      "name": "myapp" //<1>
+    },
+    "port": {
+      "targetPort": "80-tcp" //<2>
+    }
+  },
+  "status": {
+    "ingress": null
+  }
+}
+----
+<1> The service the route should forward traffic to.
+<2> The target port on pods selected by the service this route points
+    to.
+
+Create a Service object
+-----------------------
+[source%linenums,json]
+.POST /api/v1/namespaces/<project>/services
+----
+{
+  "kind": "Service",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "myapp",
+    "labels": {
+      "app": "myapp"
+    }
+  },
+  "spec": {
+    "ports": [
+      {
+        "protocol": "TCP",
+        "port": 20000 //<1>
+      }
+    ],
+    "selector": { //<2>
+      "app": "myapp",
+      "deploymentconfig": "myapp"
+    }
+  },
+  "status": {
+    "loadBalancer": {}
+  }
+}
+----
+<1> The port that will be exposed by this service.
+<2> Route service traffic to pods with label keys and values matching
+    this selector.
+
+API Status object
+-----------------
+Successful requests generally returns the object with a few added fields such at creation timestamps as well as the status of the object. +
+A failed request will return a `Status` object with the error message.
+
+[source%linenums,json]
+.POST /api/v1/namespaces/<project>/services
+----
+...
+{
+  "kind": "Status",
+  "apiVersion": "v1",
+  "metadata": {},
+  "status": "Failure",
+  "message": "services \"myapp\" already exists",
+  "reason": "AlreadyExists",
+  "details": {
+    "name": "myapp",
+    "kind": "services"
+  },
+  "code": 409
+}
+----
+
+Create a new deployment
+-----------------------
+This example will deploy the
+https://hub.docker.com/r/openshift/hello-openshift/[`hello-openshift`]
+container from docker hub.
+[source%linenums,json]
+.POST /oapi/v1/namespaces/<project>/deploymentconfigs
+----
+{
+  "apiVersion": "v1",
+  "kind": "DeploymentConfig",
+  "metadata": {
+    "annotations": {},
+    "labels": {
+      "app": "hello-openshift"
+    },
+    "name": "hello-openshift"
+  },
+  "spec": {
+    "replicas": 1,
+    "selector": {
+      "app": "hello-openshift",
+      "deploymentconfig": "hello-openshift"
+    },
+    "strategy": {
+      "resources": {},
+      "rollingParams": {
+        "intervalSeconds": 1,
+        "maxSurge": "25%",
+        "maxUnavailable": "25%",
+        "timeoutSeconds": 600,
+        "updatePeriodSeconds": 1
+      },
+      "type": "Rolling"
+    },
+    "template": {
+      "metadata": {
+        "annotations": {
+          "openshift.io/container.hello-openshift.image.entrypoint":
+"[\"/hello-openshift\"]"
+        },
+        "labels": {
+          "app": "hello-openshift",
+          "deploymentconfig": "hello-openshift"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "image": "openshift/hello-openshift:latest",
+            "imagePullPolicy": "IfNotPresent",
+            "name": "hello-openshift",
+            "ports": [
+              {
+                "containerPort": 8080,
+                "protocol": "TCP"
+              },
+              {
+                "containerPort": 8888,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {},
+            "terminationMessagePath": "/dev/termination-log"
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "restartPolicy": "Always",
+        "securityContext": {},
+        "terminationGracePeriodSeconds": 30
+      }
+    },
+    "test": false,
+    "triggers": [
+      {
+        "type": "ConfigChange"
+      },
+      {
+        "type": "ImageChange",
+        "imageChangeParams": {
+          "automatic": true,
+          "containerNames": [
+            "hello-openshift"
+          ],
+          "from": {
+            "kind": "ImageStreamTag",
+            "name": "hello-openshift:latest"
+          }
+        }
+      }
+    ]
+  },
+  "status": {
+    "latestVersion": 1
+  }
+}
+----

@@ -1,0 +1,11 @@
+---
+title: About
+date: 2025-09-14T17:07:59-04:00
+menus: about
+tags:
+- hugo
+- asciidoc
+---
+
+I'm a Principal Consultant at Red Hat, where I mostly work with clients on OpenShift.
+

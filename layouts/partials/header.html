@@ -1,0 +1,8 @@
+<head>
+  <title>{{ .Title }}</title>
+  {{ $syntax := resources.Get "css/thankful_eyes.css" }}
+  <link rel="stylesheet" href="{{ $syntax.RelPermalink }}">
+  {{ $custom := resources.Get "css/custom.css" }}
+  <link rel="stylesheet" href="{{ $custom.RelPermalink }}">
+  {{ partial "main-menu.html" . }}
+</head>

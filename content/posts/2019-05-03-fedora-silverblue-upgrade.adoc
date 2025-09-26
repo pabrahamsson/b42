@@ -1,0 +1,26 @@
+---
+tags: ["fedora", "silverblue", "upgrade"]
+title: Upgrading to Fedora Silverblue 30
+date: 2019-05-03
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+== Introduction
+With the recenly released https://fedoramagazine.org/announcing-fedora-30/[Fedora 30] it was time to do my first upgrade since installing https://silverblue.fedoraproject.org[Fedora Silverblue 29] (aka Fedora Atomic Workstation).
+
+== Performing the upgrade
+The instructions from the https://docs.fedoraproject.org/en-US/fedora-silverblue/upgrades/#change-to-a-new-os-release[Silverblue documentation] are pretty straightforward:
+[source,shell]
+----
+$ sudo ostree remote gpg-import fedora-workstation -k /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-30-primary
+$ rpm-ostree rebase fedora-workstation:fedora/30/x86_64/silverblue
+----
+This took a few minutes and depends on your internet speed. Once these commands finish you'll be told to run `systemctl reboot`. This will reboot your system and when the Grub menu comes up, Fedora 30 should be the default. +
+Profit and enjoy Fedora 30!!
+
+== Finish up
+This is by far the quickest and easiest OS version upgrade I've ever done. +
+Kudos to the Silverblue Team.

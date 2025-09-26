@@ -1,0 +1,49 @@
+---
+tags: ["gitlab", "pages", "letsencrypt", "cloudflare", "cicd"]
+title: GitLab CI/CD pipeline for automated renewal of Let's Encrypt certificate
+date: 2018-11-24
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+== Introduction
+I've been using https://about.gitlab.com/product/pages/[GitLab Pages] to host this site for some time (not exactly excelling at posting). I've also been using https://letsencrypt.org[Let's Encrypt] to provide me with free certificates. However, up until recently the certificat renewal process was a manual process. This was of course less than ideal but then I came across https://www.ummels.de/2018/09/03/gitlab-lets-encrypt/[an excellent blog post] by https://www.ummels.de/[Michael Ummels] which provided me with the necessary steps for automating the certificate renewal process.
+
+== Putting it together
+My DNS hosting provider is https://www.cloudflare.com/dns/[Cloudflare] which actually makes certificate renewal even easier thanks to the https://certbot-dns-cloudflare.readthedocs.io/en/stable/[certbot-dns-cloudflare] plugin. +
+Reading the certbot-dns-cloudflare documentation lets us know that we need our Cloudflare e-mail address and our Cloudflare token. These can be put in a file and then read through the `--dns-cloudflare-credentials` parameter. +
+Time to start updating `.gitlab-ci.yml`.
+[source%linenums,yaml]
+..gitlab-ci.yml
+----
+...
+update_cert:
+  before_script:
+    - apk add -no-cache curl
+    - pip install certbot-dns-cloudflare
+    - echo "dns_cloudflare_email" = $GITLAB_USER_EMAIL" > cf.ini //<1>
+    - echo "dns_cloudflare_api_key" = $CF_TOKEN" >> cf.ini       //<2>
+    - chmod 600 cf.ini
+  image:
+    name: certbot/certbot
+    entrypoint: [""]
+  only:
+    - schedules
+  script:
+    - certbot certonly -n --agree-tos --dns-cloudflare --dns-cloudflare-credentials cf.ini --dns-cloudflare-propagation-seconds 60 -d $DOMAIN -m $GITLAB_USER_EMAIL //<1>
+    - "curl --silent --fail --show-error --request PUT --header \"Private-Token: $PAGES_TOKEN\" --form \"certificate=@$CERT_FILE\" --form \"key=@$KEY_FILE\" https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/pages/domains/$DOMAIN" //<3>
+  stage: update
+  variables:
+    DOMAIN: "p42.jebus.nu"
+    CERT_FILE: "/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+    KEY_FILE: "/etc/letsencrypt/live/$DOMAIN/privkey.pem"
+----
+<1> I'm using the same e-mail address for Gitlab, Let's Encrypt and Cloudflare and can thus use the predefined `$GITLAB_USER_EMAIL` variable.
+<2> I store `$CF_TOKEN` as a https://docs.gitlab.com/ee/ci/variables/#variables[protected variable]
+<3> `$PAGES_TOKEN` is also a protected variable
+
+== Finish up
+Once you have a pipeline and it is working all that remains is to schedule it to run at a regular interval so that your certificate can be renewed automatically. +
+For this we'll use the https://docs.gitlab.com/ee/user/project/pipelines/schedules.html[pipeline schedule] feature. I've configured my pipeline to run every other month (`0 4 15 */2 *`).

@@ -1,0 +1,518 @@
+---
+title: Openshift Sidecar Logging
+date: 2017-02-20T15:55:28-04:00
+layout: post
+tags: ["openshift", "sidecar", "logging"]
+---
+
+:source-highlighter: rouge
+:icons: font
+
+:toc:
+:toclevels: 4
+
+= Sidecar logging with OpenShift
+Petter Abrahamsson <petter@redhat.com>
+v1.0, 2017-02-20
+
+
+== Introduction
+
+So you've gotten your application deployed to OpenShift but
+due to reasons beyond your control you still have some logs being
+written to file(s). Hence it's a struggle every time you need to
+access the logs for your application. +
+Cue sidecar container.
+
+I will use three different tools for parsing your files and outputting
+them to stdout so that they can be picked up by OpenShift and viewed
+with `oc log <pod name>`.
+
+- http://www.fluentd.org[fluentd]
+- https://www.elastic.co/products/beats/filebeat[filebeat]
+- https://www.gnu.org/software/coreutils/manual/html_node/tail-invocation.html[tail] (GNU Coreutils)
+
+
+== Image registry
+
+In the examples below I use local docker builds and push the images to
+my OpenShift registry. +
+Use the `oc` client to find your registry route
+[source,shell]
+----
+$ oc get route -n default
+NAME              HOST/PORT              PATH SERVICE               TERMINATION   LABELS
+docker-registry   registry.example.com   docker-registry:5000-tcp   passthrough   docker-registry=default
+----
+
+Login to the registry
+[source,shell]
+----
+$ docker login -u admin -p $(cat token.txt) -e petter@redhat.com registry.example.com:5000 //<1>
+WARNING: login credentials saved in /home/vagrant/.docker/config.json
+Login Succeeded
+----
+<1> You'll need your user's token (`oc whoami -t`) stored in `token.txt` for the above example.
+
+== Application
+
+For this example I'll use https://hub.docker.com/_/httpd/[the official
+httpd image] from Docker Hub with a slight modification to the
+`CustomLog` directive.
+[source,docker,linenums]
+.Dockerfile
+----
+FROM httpd
+MAINTAINER Petter Abrahamsson <petter@redhat.com>
+
+RUN sed -i 's|\(    CustomLog\).*|\1 /logs/access_log combined|' conf/httpd.conf
+VOLUME /logs
+----
+
+Let's make sure it all looks good.
+[source,shell]
+----
+$ docker build -t registry.example.com:5000/logging/httpd .
+Sending build context to Docker daemon 11.26 kB
+Step 1 : FROM httpd
+Trying to pull repository docker.io/library/httpd ... 
+latest: Pulling from docker.io/library/httpd
+Digest:
+sha256:81fa70287ee1d56fb9156f6f89137363c50c40dd088a46568f4c2f7a901e2674
+Status: Downloaded newer image for docker.io/httpd:latest
+ ---> 6587355a8c4f
+Step 2 : RUN sed -i 's|\(    CustomLog\).*$|\1 /logs/access_log combined|' conf/httpd.conf
+ ---> Using cache
+ ---> c9c102adba51
+Step 3 : VOLUME /logs
+ ---> Using cache
+ ---> 065a021e0702
+Successfully built 065a021e0702
+----
+
+Alright, let's get this thing running.
+[source,shell]
+----
+$ docker run -d --name httpd registry.example.com:5000/logging/httpd
+a9e364c49d44c9b80c363cc8d910743d9da7dcebe83720d436d8cc64ada30b57
+$ curl $(docker inspect -f='{{.NetworkSettings.Networks.bridge.IPAddress}}' httpd)
+<html><body><h1>It works!</h1></body></html>
+$ docker exec -it httpd cat /logs/access_log
+172.17.0.1 - - [17/Feb/2017:20:44:49 +0000] "GET / HTTP/1.1" 200 45 "-" "curl/7.29.0"
+----
+Looks good, let's move on to creating the sidecar containers.
+
+[#fluentd]
+=== Fluentd
+
+[source,docker,linenums]
+----
+FROM fluent/fluentd
+MAINTAINER Petter Abrahamsson <petter@redhat.com>
+
+ADD fluent.conf /fluentd/etc/fluent.conf
+----
+
+[source,html,linenums]
+----
+<source>
+  @type tail
+  path /logs/access_log
+  pos_file /tmp/apache2.logs.pos
+  tag apache.*
+  format apache2
+</source>
+
+<match **>
+  @type stdout
+</match>
+----
+Let's build the fluentd image
+[source,shell]
+----
+$ docker build -t registry.example.com:5000/logging/fluentd .
+Sending build context to Docker daemon 3.072 kB
+Step 1 : FROM fluent/fluentd
+Trying to pull repository docker.io/fluent/fluentd ... 
+latest: Pulling from docker.io/fluent/fluentd
+Digest:
+sha256:35eca2889900e59e8fdbc4dd88ffc5fc0619603dc70ae40eca9fd0d00f8d3322
+Status: Downloaded newer image for docker.io/fluent/fluentd:latest
+ ---> 9797f4f08df2
+Step 2 : ADD fluent.conf /fluentd/etc/fluent.conf
+ ---> Using cache
+ ---> 76b393128d1c
+Successfully built 76b393128d1c
+----
+Make sure it starts up correctly.
+[source,shell]
+----
+$ docker run -it --rm registry.example.com:5000/fluentd
+2017-02-17 21:23:53 +0000 [info]: reading config file
+path="/fluentd/etc/fluent.conf"
+2017-02-17 21:23:53 +0000 [info]: starting fluentd-0.12.32
+2017-02-17 21:23:53 +0000 [info]: gem 'fluentd' version '0.12.32'
+2017-02-17 21:23:53 +0000 [info]: adding match pattern="**" type="stdout"
+2017-02-17 21:23:53 +0000 [info]: adding source type="tail"
+2017-02-17 21:23:53 +0000 [info]: using configuration file: <ROOT>
+  <source>
+    @type tail
+    path /logs/access_log
+    pos_file /tmp/apache2.logs.pos
+    tag apache.*
+    format apache2
+  </source>
+  <match **>
+    @type stdout
+  </match>
+</ROOT>
+^C2017-02-17 21:24:01 +0000 [info]: shutting down fluentd
+2017-02-17 21:24:01 +0000 [info]: shutting down input type="tail" plugin_id="object:3f8eaf97f52c"
+2017-02-17 21:24:01 +0000 fluent.info: {"message":"shutting down fluentd"}
+2017-02-17 21:24:01 +0000 fluent.info: {"type":"tail","plugin_id":"object:3f8eaf97f52c","message":"shutting down input type=\"tail\" plugin_id=\"object:3f8eaf97f52c\"}
+2017-02-17 21:24:02 +0000 [info]: shutting down output type="stdout" plugin_id="object:3f8eafb7bba0"
+2017-02-17 21:24:02 +0000 [info]: process finished code=0}
+----
+
+[#filebeat]
+=== Filebeat
+
+[source%linenums,docker]
+.Dockerfile
+----
+FROM prima/filebeat
+MAINTAINER Petter Abrahamsson <petter@redhat.com>
+
+COPY filebeat.yml /filebeat.yml
+----
+[source%linenums,yaml]
+.filebeat.yml
+----
+filebeat.prospectors:
+- input_type: log
+  paths:
+    - /logs/access_log
+output.console:
+  pretty: false
+----
+Build the image
+[source,shell]
+----
+$ docker build -t registry.example.com:5000/logging/filebeat .
+Sending build context to Docker daemon 3.072 kB
+Step 1 : FROM prima/filebeat
+Trying to pull repository docker.io/prima/filebeat ... 
+latest: Pulling from docker.io/prima/filebeat
+5040bd298390: Already exists 
+9286bd3b48ad: Pull complete 
+2980437149b4: Pull complete 
+Digest:
+sha256:75bd5893fcf4fa3870ee6858fddbdedb7e222bb3dd2165f067949025d93a9943
+Status: Downloaded newer image for docker.io/prima/filebeat:latest
+ ---> d2beed8d7c4a
+Step 2 : COPY filebeat.yml /filebeat.yml
+ ---> 57df1d7c2707
+Removing intermediate container 3069d3b28a28
+Successfully built 57df1d7c2707
+----
+Test it
+[source,shell]
+----
+$ docker run -it --rm registry.example.com:5000/logging/filebeat
+2017/02/17 21:35:36.376895 beat.go:267: INFO Home path: [/] Config path: [/] Data path: [//data] Logs path: [//logs]
+2017/02/17 21:35:36.376944 beat.go:177: INFO Setup Beat: filebeat; Version: 5.2.1
+2017/02/17 21:35:36.377007 outputs.go:106: INFO Activated console as output plugin.
+2017/02/17 21:35:36.377137 logp.go:219: INFO Metrics logging every 30s
+2017/02/17 21:35:36.377403 publish.go:291: INFO Publisher name: cdffe19160d2
+2017/02/17 21:35:36.378024 async.go:63: INFO Flush Interval set to: 1s
+2017/02/17 21:35:36.378041 async.go:64: INFO Max Bulk Size set to: 2048
+2017/02/17 21:35:36.378194 beat.go:207: INFO filebeat start running.
+2017/02/17 21:35:36.378247 registrar.go:68: INFO No registry file found under: /data/registry. Creating a new registry file.
+2017/02/17 21:35:36.378474 registrar.go:106: INFO Loading registrar data from /data/registry
+2017/02/17 21:35:36.378505 registrar.go:123: INFO States Loaded from registrar: 0
+2017/02/17 21:35:36.378523 crawler.go:34: INFO Loading Prospectors: 1
+2017/02/17 21:35:36.378568 prospector_log.go:57: INFO Prospector with previous states loaded: 0
+2017/02/17 21:35:36.378613 crawler.go:48: INFO Loading Prospectors completed. Number of prospectors: 1
+2017/02/17 21:35:36.378621 crawler.go:63: INFO All prospectors are initialised and running with 0 states to persist
+2017/02/17 21:35:36.378630 registrar.go:236: INFO Starting Registrar
+2017/02/17 21:35:36.378651 sync.go:41: INFO Start sending events to output
+2017/02/17 21:35:36.378678 spooler.go:63: INFO Starting spooler: spool_size: 2048; idle_timeout: 5s
+2017/02/17 21:35:36.378711 prospector.go:112: INFO Starting prospector of type: log
+^C2017/02/17 21:35:41.922364 filebeat.go:168: INFO Stopping filebeat
+2017/02/17 21:35:41.922541 crawler.go:69: INFO Stopping Crawler
+2017/02/17 21:35:41.922585 crawler.go:75: INFO Stopping 1 prospectors
+2017/02/17 21:35:41.922680 prospector.go:187: INFO Stopping Prospector
+2017/02/17 21:35:41.922964 prospector.go:153: INFO Prospector ticker stopped
+2017/02/17 21:35:41.923008 prospector.go:129: INFO Prospector channel stopped
+2017/02/17 21:35:41.923126 crawler.go:82: INFO Crawler stopped
+2017/02/17 21:35:41.923159 spooler.go:101: INFO Stopping spooler
+2017/02/17 21:35:41.923226 registrar.go:291: INFO Stopping Registrar
+2017/02/17 21:35:41.923258 registrar.go:248: INFO Ending Registrar
+2017/02/17 21:35:41.925365 logp.go:245: INFO Total non-zero values: registrar.writes=2
+2017/02/17 21:35:41.925790 logp.go:246: INFO Uptime: 5.566581205s
+2017/02/17 21:35:41.925823 beat.go:211: INFO filebeat stopped.
+----
+
+[#tail]
+=== tail
+
+[source%linenums,docker]
+.Dockerfile
+----
+FROM alpine
+MAINTAINER Petter Abrahamsson <petter@redhat.com>
+
+ENV TAIL_FILES /logs/access_log
+
+cmd tail -F $TAIL_FILES
+----
+Building time
+[source,shell]
+----
+$ docker build -t registry.example.com:5000/logging/tail .
+Sending build context to Docker daemon 2.048 kB
+Step 1 : FROM alpine
+latest: Pulling from docker.io/library/alpine
+0a8490d0dfd3: Already exists 
+Digest:
+sha256:dfbd4a3a8ebca874ebd2474f044a0b33600d4523d03b0df76e5c5986cb02d7e8
+Status: Downloaded newer image for docker.io/alpine:latest
+ ---> 88e169ea8f46
+Step 2 : ENV TAIL_FILES /logs/access_log
+ ---> Running in c470df47e8e1
+ ---> 1e3c2e45d4d8
+Removing intermediate container c470df47e8e1
+Step 3 : CMD tail -F $TAIL_FILES
+ ---> Running in 9373094a7a1f
+ ---> c7b2d3c2a9e2
+Removing intermediate container 9373094a7a1f
+Successfully built c7b2d3c2a9e2
+----
+Again let's make sure it starts correctly
+[source,shell]
+----
+$ docker run -it --rm registry.example.com:5000/logging/tail
+tail: can't open '/logs/access_log': No such file or directory
+^C
+----
+NOTE: The complaint about `/logs/access_log` not being available is
+expected.
+
+[#push]
+== Push images to your registry
+
+Let's push our recently built images to the registry. If you followed
+these examples from the beginning you've already logged into the
+registry and can start pushing the images.
+[source,shell]
+.list the images
+----
+$ docker images
+registry.example.com:5000/logging/filebeat                        latest 57df1d7c2707        2 days ago          140 MB
+registry.example.com:5000/logging/fluentd                         latest 76b393128d1c        2 days ago          36.3 MB
+registry.example.com:5000/logging/tail                            latest 065a021e0702        2 days ago          175.9 MB
+registry.example.com:5000/logging/httpd                           latest 039663210450        3 days ago          175.9 MB
+----
+[source,shell]
+.let's push
+----
+$ for image in $(docker images | awk '{print $1}'); do docker push $image;done
+The push refers to a repository [registry.example.com:5000/logging/filebeat]
+ed4b5516382a: Pushed
+b5f6cf4c741b: Pushed
+3ea7ac8a2934: Pushed
+...
+----
+[source,shell]
+.verify that the imageStreams got created
+----
+$ oc project logging
+Now using project "logging" on server "https://127.0.0.1:8443".
+$ oc get imagestream
+NAME       DOCKER REPO                            TAGS         UPDATED
+filebeat   registry.example.com:5000/logging/filebeat   latest       29 seconds ago
+fluentd    registry.example.com:5000/logging/fluentd    latest       29 seconds ago
+httpd      registry.example.com:5000/logging/httpd      latest       27 seconds ago
+tail       registry.example.com:5000/logging/tail       latest       28 seconds ago
+----
+
+[#deploy]
+== Deploy the application
+
+Define the deploymentconfig and the service.
+[source%linenums,yaml]
+.httpd.yaml
+----
+apiVersion: v1
+kind: List
+metadata: {}
+items:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: httpd
+    name: httpd
+  spec:
+    replicas: 1
+    selector:
+      app: httpd
+      deploymentconfig: httpd
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/container.httpd.image.entrypoint: '["httpd-foreground"]'
+        creationTimestamp: null
+        labels:
+          app: httpd
+          deploymentconfig: httpd
+      spec:
+        containers:
+        - image: 172.30.165.210:5000/logging/httpd:latest
+          imagePullPolicy: IfNotPresent
+          name: httpd
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /logs
+            name: httpd-volume-1
+        - image: 172.30.165.210:5000/logging/fluentd:latest
+          imagePullPolicy: Always
+          name: fluentd
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /logs
+            name: httpd-volume-1
+        - image: 172.30.165.210:5000/logging/filebeat:latest
+          imagePullPolicy: Always
+          name: filebeat
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /logs
+            name: httpd-volume-1
+        - image: 172.30.165.210:5000/logging/tail:latest
+          imagePullPolicy: Always
+          name: tail
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /logs
+            name: httpd-volume-1
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - emptyDir: {}
+          name: httpd-volume-1
+    test: false
+    triggers:
+    - type: ConfigChange
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: httpd
+    name: httpd
+  spec:
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+    selector:
+      app: httpd
+      deploymentconfig: httpd
+  status:
+    loadBalancer: {}
+----
+
+Kick off the deployment
+[source,shell]
+----
+$ oc create -f httpd.yaml
+deploymentconfig "httpd" created
+service "httpd" created
+----
+Wait a few seconds and check the status of your pods and your
+service.
+[source,shell]
+----
+$ oc get pods
+NAME            READY     STATUS    RESTARTS   AGE
+httpd-1-7a62t   4/4       Running   0          11s
+$ oc get svc
+NAME      CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+httpd     172.30.161.25   <none>        80/TCP    12s
+----
+Looks good, we have 4 out of 4 containers running in the pod.
+Let's hit it with a few requests and check on the logs.
+[source,shell]
+----
+$ for i in {1..5};do curl 172.30.161.25;done
+<html><body><h1>It works!</h1></body></html>
+<html><body><h1>It works!</h1></body></html>
+<html><body><h1>It works!</h1></body></html>
+<html><body><h1>It works!</h1></body></html>
+<html><body><h1>It works!</h1></body></html>
+$
+$ oc logs -c fluentd httpd-1-7a62t
+...
+2017-02-20 20:30:49 +0000 apache.logs.access_log: {"host":"192.168.121.24","user":null,"method":"GET","path":"/","code":200,"size":45,"referer":null,"agent":"curl/7.29.0"}
+2017-02-20 20:30:49 +0000 apache.logs.access_log: {"host":"192.168.121.24","user":null,"method":"GET","path":"/","code":200,"size":45,"referer":null,"agent":null}
+2017-02-20 20:30:49 +0000 apache.logs.access_log: {"host":"192.168.121.24","user":null,"method":"GET","path":"/","code":200,"size":45,"referer":null,"agent":"curl/7.29.0"}
+2017-02-20 20:30:49 +0000 apache.logs.access_log: {"host":"192.168.121.24","user":null,"method":"GET","path":"/","code":200,"size":45,"referer":null,"agent":null}
+2017-02-20 20:30:49 +0000 apache.logs.access_log: {"host":"192.168.121.24","user":null,"method":"GET","path":"/","code":200,"size":45,"referer":null,"agent":"curl/7.29.0"}
+$
+$ oc logs -c filebeat httpd-1-7a62t
+...
+{"@timestamp":"2017-02-20T20:30:49.760Z","beat":{"hostname":"httpd-1-7a62t","name":"httpd-1-7a62t","version":"5.2.1"},"input_type":"log","message":"192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] \"GET / HTTP/1.1\" 200 45 \"-\" \"curl/7.29.0\","offset":324,"source":"/logs/access_log","type":"log"}
+{"@timestamp":"2017-02-20T20:30:49.760Z","beat":{"hostname":"httpd-1-7a62t","name":"httpd-1-7a62t","version":"5.2.1"},"input_type":"log","message":"192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] \"GET / HTTP/1.1\" 200 45","offset":396,"source":"/logs/access_log","type":"log"}
+{"@timestamp":"2017-02-20T20:30:49.760Z","beat":{"hostname":"httpd-1-7a62t","name":"httpd-1-7a62t","version":"5.2.1"},"input_type":"log","message":"192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] \"GET / HTTP/1.1\" 200 45 \"-\" \"curl/7.29.0\","offset":486,"source":"/logs/access_log","type":"log"}
+{"@timestamp":"2017-02-20T20:30:49.760Z","beat":{"hostname":"httpd-1-7a62t","name":"httpd-1-7a62t","version":"5.2.1"},"input_type":"log","message":"192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] \"GET / HTTP/1.1\" 200 45","offset":558,"source":"/logs/access_log","type":"log"}
+{"@timestamp":"2017-02-20T20:30:49.760Z","beat":{"hostname":"httpd-1-7a62t","name":"httpd-1-7a62t","version":"5.2.1"},"input_type":"log","message":"192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] \"GET / HTTP/1.1\" 200 45 \"-\" \"curl/7.29.0\","offset":648,"source":"/logs/access_log","type":"log"}
+$
+$ oc logs -c tail httpd-1-7a62t
+==> /logs/access_log <==
+...
+192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] "GET / HTTP/1.1" 200 45
+192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] "GET / HTTP/1.1" 200 45
+192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] "GET / HTTP/1.1" 200 45
+192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] "GET / HTTP/1.1" 200 45
+192.168.121.24 - - [20/Feb/2017:20:30:49 +0000] "GET / HTTP/1.1" 200 45
+$
+----
+
+[#summary]
+== Summary
+
+The examples above shows you three different options for logging
+sidecar containers. Pick whichever one that suits your needs and
+use case.

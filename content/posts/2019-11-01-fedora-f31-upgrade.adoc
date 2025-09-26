@@ -1,0 +1,44 @@
+---
+tags: ["fedora", "silverblue", "upgrade", "f31"]
+title: Upgrading to Fedora Silverblue 31
+date: 2019-11-01
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+== Introduction
+With the recenly released https://fedoramagazine.org/announcing-fedora-31/[Fedora 31] it was time to do another upgrade.
+
+== Performing the upgrade
+Again, the instructions from the https://docs.fedoraproject.org/en-US/fedora-silverblue/updates-upgrades-rollbacks/#upgrading[documentation] are very simple and straightforward.
+[source,shell]
+----
+$ sudo ostree remote gpg-import fedora -k /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-30-primary
+$ rpm-ostree rebase fedora:fedora/30/x86_64/silverblue
+----
+This took a few minutes and depends on your internet speed. Once these commands finish you'll be told to run `systemctl reboot`. This will reboot your system and when the Grub menu comes up, Fedora 31 should be the default. +
+Profit and enjoy Fedora 31!!
+
+== Toolbox issue
+After successfully upgrading I tried to hop into one of my https://docs.fedoraproject.org/en-US/fedora-silverblue/toolbox/[Toolbox] containers.
+[source,shell]
+----
+$ toolbox enter
+toolbox: unable to migrate containers: Podman version couldn't be read
+----
+After reaching out to some members of the Silverblue team I was given the following suggestion:
+[quote, Ben Breard]
+----
+I suspect you may have a stale libpod.conf file that could be causing issues w/ the default crun in F31
+----
+So I tried the following
+[source,shell]
+----
+$ mv ~/.config/containers/libpod.conf /tmp
+----
+Now I was able to hop into my Toolbox container again (and a new libpod.conf file was automatically generated).
+
+== Finish up
+Kudos to the Silverblue Team for another great release.

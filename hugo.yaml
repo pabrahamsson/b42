@@ -1,0 +1,51 @@
+baseURL: /
+theme: terminal
+
+security:
+  exec:
+    allow:
+      - ^asciidoctor$
+
+markup:
+  asciidocExt:
+    attributes:
+      source-highlighter: rouge
+      icons: font
+    backend: html5
+    failureLevel: fatal
+    noHeaderOrFooter: true
+    preserveTOC: false
+    safeMode: unsafe
+    trace: false
+    sectionNumbers: false
+    verbose: false
+    workingFolderCurrent: false
+  highlight:
+    codeFences: false
+
+languages:
+  en:
+    title: The 42 project
+    menu:
+      main:
+        - identifier: home
+          name: Home
+          url: /posts
+          weight: 1
+        - identifier: about
+          name: About
+          url: /about
+          weight: 2
+
+#menus:
+#  main:
+#    - name: Home
+#      pageRef: /about
+#    - name: Posts
+#      pageRef: /posts
+
+params:
+  centerTheme: true
+  contenTypeName: posts
+  readingTime: true
+  showMenuItems: 2
