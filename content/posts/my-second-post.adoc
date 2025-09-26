@@ -1,0 +1,32 @@
+---
+title: This is my second post
+date: 2025-08-23T09:39:58+05:30
+draft: true
+categories:
+  - Java
+tags:
+  - java
+  - spring-boot
+---
+
+In this guide, you will learn how to write HelloWorld program in Java.
+
+== Prerequisites
+* Java 17+
+* Your favorite IDE (Intellij IDEA, Eclipse, NetBeans, VS Code)
+
+== Say Hello in Java
+
+Here is how to write code snippet using Asciidoc format.
+
+[source,java]
+----
+class Hello {
+    String hello() {
+        return "Hello";
+    }
+}
+----
+
+== Summary
+To learn more interesting things, visit https://www.sivalabs.in

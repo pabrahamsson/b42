@@ -1,0 +1,206 @@
+:root {
+  --admonition-background: var(--panel-background);
+  --admonition-label-font-weight: 600;
+  --caption-font-color: #5d5d5d;
+  --caption-font-style: italic;
+  --caption-font-weight: 600;
+  --caution-color: #802392;
+  --caution-on-color: var(--color-white);
+  --color-white: #fff;
+  --doc-icon-filter: invert(14.5%);
+  --important-color: #e40046;
+  --important-on-color: var(--color-white);
+  --note-color: #2d7dd2;
+  --note-on-color: var(--color-white);
+  --panel-background: rgb(46,46,51);
+  --quote-border-color: #5d5d5d;
+  --quote-font-color: #5d5d5d;
+  --rem-base: 18;
+  --tip-color: #43b929;
+  --tip-on-color: var(--color-white);
+  --warning-color: #f70;
+  --warning-on-color: var(--color-white);
+}
+
+.main-navigation ul.main-menu {
+  margin-left: 0;
+}
+
+.main-navigation ul.main-menu li {
+  display: inline-block;
+}
+
+table.linenotable, td.linenos, td.code {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background-color: none;
+}
+
+.highlight table td {
+  padding: 0;
+}
+
+.highlight td.code pre {
+  background: none !important;
+}
+
+.colist table, .colist td {
+  border: 0;
+  margin: 0;
+}
+
+/* Admonitions */
+*, ::after, ::before  {
+  box-sizing: inherit;
+}
+.admonitionblock {
+  margin: 1.4rem 0 0;
+}
+.admonitionblock > table {
+  position: relative;
+  table-layout: fixed;
+  width: 100%;
+  border: 0;
+}
+.admonitionblock td.icon [class^="fa icon-"] {
+  font-size: 1.5em;
+  text-shadow: 1px 1px 2px rgba(0,0,0,.5);
+  cursor: default
+}
+.admonitionblock td.icon {
+  font-size: calc(15/var(--rem-base)*1rm);
+  left: 0;
+  /*
+  line-height: 1;
+  padding: 0;
+  */
+  position: absolute;
+  top: 0;
+  /*
+  transform: translate(-.5rem,-50%);
+  */
+  display: block;
+  border: 0;
+}
+.admonitionblock td.icon i {
+  align-items: center;
+  background: linear-gradient(90deg, rgba(0,0,0,.2) 0, rgba(0,0,0,.2)) no-repeat 0 /2.05em 100%;
+  border-radius: .5em;
+  display: inline-flex;
+  filter: none;
+  height: 1.5em;
+  padding: 0 .5em;
+  vertical-align: initial;
+  width: fit-content;
+}
+.admonitionblock td.icon i.icon-caution {
+  background-color: var(--caution-color);
+  color: var(--caution-on-color);
+}
+.admonitionblock td.icon i.icon-important {
+  background-color: var(--important-color);
+  color: var(--important-on-color);
+}
+.admonitionblock td.icon i.icon-note {
+  background-color: var(--note-color);
+  color: var(--note-on-color);
+}
+.admonitionblock td.icon i.icon-tip {
+  background-color: var(--tip-color);
+  color: var(--tip-on-color);
+}
+.admonitionblock td.icon i.icon-warning {
+  background-color: var(--warning-color);
+  color: var(--warning-on-color);
+}
+i.fa {
+  background: no-repeat 50%/1em 1em;
+  display: inline-block;
+  filter: var(--doc-icon-filter);
+  font-style: normal;
+  height: 1em,
+  -webkit-hyphens: none;
+  hyphens: none;
+  vertical-align: -.125em;
+  width: 1em;
+}
+.admonitionblock td.icon i.icon-caution::before {
+  background-image: url("https://docs.asciidoctor.org/_/img/octicons-16.svg#view-flame");
+}
+.admonitionblock td.icon i.icon-important::before {
+  background-image: url("https://docs.asciidoctor.org/_/img/octicons-16.svg#view-stop");
+}
+.admonitionblock td.icon i.icon-note::before {
+  background-image: url("https://docs.asciidoctor.org/_/img/octicons-16.svg#view-info");
+}
+.admonitionblock td.icon i.icon-tip::before {
+  background-image: url("https://docs.asciidoctor.org/_/img/octicons-16.svg#view-light-bulb");
+}
+.admonitionblock td.icon i.icon-warning::before {
+  background-image: url("https://docs.asciidoctor.org/_/img/octicons-16.svg#view-alert");
+}
+.admonitionblock td.icon i::before {
+  background: no-repeat .05em/1em 1em;
+  content: "";
+  filter: invert(100%);
+  height: inherit;
+  width: 1.5em;
+}
+.admonitionblock td.icon i::after {
+  content: attr(title);
+  font-style: normal;
+  font-weight: var(--admonition-label-font-weight);
+  padding-left: .5em;
+  text-transform: uppercase;
+}
+/*
+.admonitionblock td.icon .icon-note:before {
+  content: "\f05a";
+  color: #19407c
+}
+.admonitionblock td.icon .icon-tip:before {
+  content: "\f0eb";
+  text-shadow: 1px 1px 2px rgba(155,155,0,.8);
+  color:#111
+}
+.admonitionblock td.icon .icon-caution:before {
+  content: "\f06d";
+  color:#bf3400
+}
+.admonitionblock td.icon .icon-important:before {
+  content: "\f06a";
+  color:#bf0000
+}
+*/
+
+.admonitionblock .title {
+  color: var(--caption-font-color);
+  font-size: calc(16/var(--rem-base)*1rem);
+  font-style: var(--caption-font-style);
+  font-weight: var(--caption-font-weight);
+  -webkit-hyphens: none;
+  hyphens: none;
+  letter-spacing: .01em;
+  padding-bottom: .075rem;
+}
+
+.admonitionblock td.content {
+  word-wrap: anywhere;
+  background: var(--admonition-background);
+  margin-top: 2em;
+  padding: 1rem 1rem .75rem;
+  width: 100%;
+  font-size: calc(16/var(--rem-base)*1rem);
+  border-radius: 1.5em;
+}
+/*
+.admonitionblock p {
+  padding: 1rem 1rem .75rem;
+}
+*/
+.admonitionblock td.content > .title + * {
+  margin-top: 0;
+}
+
+

@@ -1,0 +1,48 @@
+---
+tags: ["git", "rebase"]
+title: Interactive git rebase
+date: 2020-06-15
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+== Introduction
+Sometimes you want to clean up your commit history before merging.
+
+== Performing the upgrade
+Probably not something most of us are proud of, but have done at some point is writing non-descriptive commit messages.
+[source,shell]
+----
+commit d2f3e7dbff6851f65a47cace0802b8422a3dbb1b
+Author: A. Comitter <a.comitter@users.noreply.github.com>
+Date:   Tue May 26 19:30:19 2020 +0530
+
+    README.adoc (#1802)
+
+    * Readme Update
+
+    * Readme added
+
+    * Readme for role
+
+    * Readme for role
+
+    * Readme for role
+----
+So assuming I have forked a git repository now referred to as `origin` and the original repository referred to as `upstream`. I have now created a new branch, `my_feature_branch` and have done a few commits as shown above. +
+I can now clean up my commit history to show a more descriptive message by doing a https://git-scm.com/docs/git-rebase[git rebase]. In my case I will use do the rebase https://git-scm.com/book/en/v2/Git-Tools-Rewriting-History[interactively].
+[source,shell]
+----
+$ git rebase -i $(git merge-base upstream/master my_feature_branch)
+----
+Follow the link above to learn how you can squash commits as well as changing your commit message. +
+Once your rebase is successful and you're happy with the look of `git log` you need to push the updates.
+[source,shell]
+----
+$ git push -f origin my_feature_branch
+----
+
+== Finish up
+A good read on git rebase vs. merge by https://dev.to/molly_struve/there-is-no-right-way-git-rebase-vs-merge-2hc5[Molly Struve].

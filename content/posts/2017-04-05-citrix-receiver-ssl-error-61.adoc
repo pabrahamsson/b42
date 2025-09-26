@@ -1,0 +1,158 @@
+---
+tags: ["citrix", "ssl", "error 61"]
+title: Citrix receiver SSL error 61
+date: 2017-04-05
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+Citrix receiver SSL error 61
+============================
+Petter Abrahamsson <petter@redhat.com>
+v1.0, April 05 2017
+:toc:
+
+Introduction
+------------
+I recently had to use the
+https://www.citrix.com/products/receiver/[Citrix Receiver] to access
+my remote desktop for a customer. No problem, the receiver is available
+for most platforms and can be
+https://www.citrix.com/downloads/citrix-receiver/[downloaded] for
+free. At the time of this writing, the latest version available for
+Linux is 13.5 footnote:[I ended up having to use 13.4, because
+of other customer configurations]. +
+This is where `SSL Error 61` showed up.
+
+Installation
+------------
+Installing the Citrix Receiver is as straightforward as downloading
+and installing the package (RPM or DEB) or tarball. Since I'm using a
+RHEL 7 desktop I installed the full RPM package (there's also a web
+receiver only option). This installs the ICA Client under
+`/opt/Citrix/ICAClient`.
+
+Connecting
+----------
+When you start the receiver it will ask for connection details such as an
+e-mail address or a URL to connect to. In my case it was a URL which I
+typed in and then hit enter only to be greeted by the message below.
+image:/images/ssl-error-61.png["SSL error 61"]
+
+Troubleshoting
+--------------
+Hmm, missing CA cert? Let's see
+https://www.google.com/search?q=linux+ssl+error+61[what
+the internets have to say]. Most seems to suggest that I should create
+a link, `sudo ln -s /usr/share/ca-certificates/mozilla/*
+/opt/Citrix/ICAClient/keystore/cacerts` which will not work on RHEL 7
+because that directory does not exist. +
+However, this tells us that CA certs are stored in
+`/opt/Citrix/ICAClient/keystore/cacerts` so let's use openssl to go
+grab the missing CA cert.
+
+Solution
+--------
+OpenSSL can be used to show the certificate chain of the URL we're
+connecting to. Use the command below and scroll through the output and
+look for the name of the missing CA cert.
+[source,shell]
+----
+$ openssl s_client -showcerts -connect client.url:443
+CONNECTED(00000003)
+---snip---
+---
+Certificate chain
+ 0 s:/.....
+ 1 s:/C=US/O=Symantec Corporation/OU=Symantec Trust
+Network/CN=Symantec Class 3 EV SSL CA - G3
+   i:/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006
+VeriSign, Inc. - For authorized use only/CN=VeriSign Class 3 Public
+Primary Certification Authority - G5
+-----BEGIN CERTIFICATE-----
+MIIFKzCCBBOgAwIBAgIQfuFKb2/v8tN/P61lTTratDANBgkqhkiG9w0BAQsFADCB
+yjELMAkGA1UEBhMCVVMxFzAVBgNVBAoTDlZlcmlTaWduLCBJbmMuMR8wHQYDVQQL
+ExZWZXJpU2lnbiBUcnVzdCBOZXR3b3JrMTowOAYDVQQLEzEoYykgMjAwNiBWZXJp
+U2lnbiwgSW5jLiAtIEZvciBhdXRob3JpemVkIHVzZSBvbmx5MUUwQwYDVQQDEzxW
+ZXJpU2lnbiBDbGFzcyAzIFB1YmxpYyBQcmltYXJ5IENlcnRpZmljYXRpb24gQXV0
+aG9yaXR5IC0gRzUwHhcNMTMxMDMxMDAwMDAwWhcNMjMxMDMwMjM1OTU5WjB3MQsw
+CQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xHzAdBgNV
+BAsTFlN5bWFudGVjIFRydXN0IE5ldHdvcmsxKDAmBgNVBAMTH1N5bWFudGVjIENs
+YXNzIDMgRVYgU1NMIENBIC0gRzMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+AoIBAQDYoWV0I+grZOIy1zM3PY71NBZI3U9/hxz4RCMTjvsR2ERaGHGOYBYmkpv9
+FwvhcXBC/r/6HMCqo6e1cej/GIP23xAKE2LIPZyn3i4/DNkd5y77Ks7Imn+Hv9hM
+BBUyydHMlXGgTihPhNk1++OGb5RT5nKKY2cuvmn2926OnGAE6yn6xEdC0niY4+wL
+pZLct5q9gGQrOHw4CVtm9i2VeoayNC6FnpAOX7ddpFFyRnATv2fytqdNFB5suVPu
+IxpOjUhVQ0GxiXVqQCjFfd3SbtICGS97JJRL6/EaqZvjI5rq+jOrCiy39GAI3Z8c
+zd0tAWaAr7MvKR0juIrhoXAHDDQPAgMBAAGjggFdMIIBWTAvBggrBgEFBQcBAQQj
+MCEwHwYIKwYBBQUHMAGGE2h0dHA6Ly9zMi5zeW1jYi5jb20wEgYDVR0TAQH/BAgw
+BgEB/wIBADBlBgNVHSAEXjBcMFoGBFUdIAAwUjAmBggrBgEFBQcCARYaaHR0cDov
+L3d3dy5zeW1hdXRoLmNvbS9jcHMwKAYIKwYBBQUHAgIwHBoaaHR0cDovL3d3dy5z
+eW1hdXRoLmNvbS9ycGEwMAYDVR0fBCkwJzAloCOgIYYfaHR0cDovL3MxLnN5bWNi
+LmNvbS9wY2EzLWc1LmNybDAOBgNVHQ8BAf8EBAMCAQYwKQYDVR0RBCIwIKQeMBwx
+GjAYBgNVBAMTEVN5bWFudGVjUEtJLTEtNTMzMB0GA1UdDgQWBBQBWavn3ToLWaZk
+Y9bPIAdX1ZHnajAfBgNVHSMEGDAWgBR/02Wnwt3su/AwCfNDOfoCrzMxMzANBgkq
+hkiG9w0BAQsFAAOCAQEAQgFVe9AWGl1Y6LubqE3X89frE5SG1n8hC0e8V5uSXU8F
+nzikEHzPg74GQ0aNCLxq1xCm+quvL2GoY/Jl339MiBKIT7Np2f8nwAqXkY9W+4nE
+qLuSLRtzsMarNvSWbCAI7woeZiRFT2cAQMgHVHQzO6atuyOfZu2iRHA0+w7qAf3P
+eHTfp61Vt19N9tY/4IbOJMdCqRMURDVLtt/JYKwMf9mTIUvunORJApjTYHtcvNUw
+LwfORELEC5n+5p/8sHiGUW3RLJ3GlvuFgrsEL/digO9i2n/2DqyQuFa9eT/ygG6j
+2bkPXToHHZGThkspTOHcteHgM52zyzaRS/6htO7w+Q==
+-----END CERTIFICATE-----
+---
+...
+----
+That's the CA cert we want so put the cert (from `-----BEGIN
+CERTFICATE-----` to `-----END CERTIFICATE-----` inclusive) into
+`/opt/Citrix/ICAClient/keystore/cacerts/VeriSignClass3PublicPrimaryCertificationAuthority-G5.pem`.  +
+Let's launch the receiver again.
+image:/images/2nd-ssl-error.png["2nd SSL Error"] +
+Ugh!! However, when trying the same URL in Firefox things are working
+just fine. Let's take a look in `cacerts` directory.
+[source,shell]
+----
+$ ls -al /opt/Citrix/ICAClient/keystore/cacerts
+total 32K
+lrwxrwxrwx. 1 root root   19 Apr  4 10:11 1ec4d31a.0 -> Class3PCA_G2_v2.pem
+lrwxrwxrwx. 1 root root   22 Apr  4 10:11 2c543cd1.0 -> GeoTrust_Global_CA.pem
+lrwxrwxrwx. 1 root root   24 Apr  4 10:11 3513523f.0 -> DigiCertGlobalRootCA.pem
+lrwxrwxrwx. 1 root root   24 Apr  4 10:11 399e7759.0 -> DigiCertGlobalRootCA.pem
+lrwxrwxrwx. 1 root root   12 Apr  4 10:11 3ad48a91.0 -> BTCTRoot.pem
+lrwxrwxrwx. 1 root root   13 Apr  4 10:11 415660c1.0 -> Pcs3ss_v4.pem
+lrwxrwxrwx. 1 root root   30 Apr  4 10:11 4bcd7fc4.0 -> DigiCertSHA2SecureServerCA.pem
+lrwxrwxrwx. 1 root root   19 Apr  4 10:11 4d654d1d.0 -> GTECTGlobalRoot.pem
+lrwxrwxrwx. 1 root root   12 Apr  4 10:11 653b494a.0 -> BTCTRoot.pem
+lrwxrwxrwx. 1 root root   19 Apr  4 10:11 6faac4e3.0 -> Class4PCA_G2_v2.pem
+lrwxrwxrwx. 1 root root   19 Apr  4 10:11 72fa7371.0 -> Class3PCA_G2_v2.pem
+lrwxrwxrwx. 1 root root   13 Apr  4 10:11 7651b327.0 -> Pcs3ss_v4.pem
+lrwxrwxrwx. 1 root root   22 Apr  4 10:11 7999be0d.0 -> GeoTrust_Global_CA.pem
+lrwxrwxrwx. 1 root root   30 Apr  4 10:11 85cf5865.0 -> DigiCertSHA2SecureServerCA.pem
+-r--r--r--. 1 root root 1.3K Aug 19  2016 BTCTRoot.pem
+lrwxrwxrwx. 1 root root   19 Apr  4 10:11 c692a373.0 -> GTECTGlobalRoot.pem
+lrwxrwxrwx. 1 root root   32 Apr  5 08:03 ca-bundle.crt -> /etc/pki/tls/certs/ca-bundle.crt
+-r--r--r--. 1 root root 1.1K Aug 19  2016 Class3PCA_G2_v2.pem
+-r--r--r--. 1 root root 1.1K Aug 19  2016 Class4PCA_G2_v2.pem
+-r--r--r--. 1 root root 1.4K Aug 19  2016 DigiCertGlobalRootCA.pem
+lrwxrwxrwx. 1 root root   42 Apr  4 10:11 DigiCertSHA2SecureServerCA.pem -> ../intcerts/DigiCertSHA2SecureServerCA.pem
+lrwxrwxrwx. 1 root root   19 Apr  4 10:11 ed049835.0 -> Class4PCA_G2_v2.pem
+-r--r--r--. 1 root root 1.2K Aug 19  2016 GeoTrust_Global_CA.pem
+-r--r--r--. 1 root root  875 Aug 19  2016 GTECTGlobalRoot.pem
+-r--r--r--. 1 root root  834 Aug 19  2016 Pcs3ss_v4.pem
+-rw-r--r--. 1 root root 1.8K Apr  5 08:59
+VeriSignClass3PublicPrimaryCertificationAuthority-G5.pem
+----
+Looks like we're missing a hash value for our cert. +
+[source,shell]
+----
+$ cd /opt/Citrix/ICAClient/keystore/cacerts
+$ sudo ln -s VeriSignClass3PublicPrimaryCertificationAuthority-G5.pem
+$(openssl x509 -hash -noout -in
+VeriSignClass3PublicPrimaryCertificationAuthority-G5.pem).0
+$ ls -al|grep Veri
+lrwxrwxrwx. 1 root root   56 Apr 10 16:56 b204d74a.0 -> VeriSignClass3PublicPrimaryCertificationAuthority-G5.pem
+-rw-r--r--. 1 root root 1760 Apr  5 08:59 VeriSignClass3PublicPrimaryCertificationAuthority-G5.pem
+----
+And I'm now able to access my remote desktop through the Citrix
+receiver.

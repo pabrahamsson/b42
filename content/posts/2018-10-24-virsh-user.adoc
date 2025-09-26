@@ -1,0 +1,74 @@
+---
+tags: ["libvirt", "virsh", "virt-manager"]
+title: Virsh for regular users
+date: 2018-10-24
+---
+
+:source-highlighter: rouge
+:rouge-style: gruvbox
+:icons: font
+
+[#introduction]
+== Introduction
+You've been using virt-manager to manage your VMs but are now moving towards using `virsh` and the command line instead. +
+However when you try to list your VMs you don't see them.
+
+[#noshow]
+== No show!
+Let's try and list our VMs
+[source,shell,subs="quotes"]
+----
+$ virsh list --all
+ Id   Name   State
+--------------------
+----
+Hmm, not what we'd hoped for. It turns out that the default behaviour (at least on Fedora 29) is for virsh to use `virsh --connect qemu:///session` which according to the virsh(1) manpage states:
+[quote, virsh(1)]
+____
+qemu:///session +
+{nbsp}{nbsp}{nbsp}{nbsp}connect locally as a normal user to his own set of QEMU and KVM domains
+____
+
+[#solution]
+== Solution
+From the above mentioned manpage we also find the following connection option:
+[quote, virsh(1)]
+____
+qemu:///system +
+{nbsp}{nbsp}{nbsp}{nbsp}connect locally as root to the daemon supervising QEMU and KVM domains
+____
+So if we try this things are looking better.
+[source,shell]
+----
+$ virsh --connect qemu:///system list --all
+ Id   Name      State
+--------------------
+1     master1   running
+2     node1     running
+----
+IMPORTANT: You now have full permissions on all VMs, be careful!
+
+[#permanent]
+== Make it permanent
+Also from the virsh(1) manpage:
+[quote, virsh(1)]
+____
+LIBVIRT_DEFAULT_URI +
+{nbsp}{nbsp}{nbsp}{nbsp}The hypervisor to connect to by default. Set this to a URI, in the same format as accepted by the connect option. This overrides the default URI set in any client config file and prevents libvirt from probing for drivers.
+____
+
+Easy enough
+[source,shell]
+----
+$ echo 'export LIBVIRT_DEFAULT_URI=qemu:///system' >> ~/.zshrc
+$ source ~/.zshrc
+----
+And now for the final test
+[source,shell]
+----
+$ virsh list --all
+ Id   Name      State  
+--------------------
+1     master1   running
+2     node1     running
+----
