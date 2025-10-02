@@ -30,11 +30,11 @@ languages:
       main:
         - identifier: home
           name: Home
-          url: /posts
+          url: /posts/
           weight: 1
         - identifier: about
           name: About
-          url: /about
+          url: /about/
           weight: 2
 
 #menus:
