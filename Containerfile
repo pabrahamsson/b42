@@ -1,3 +1,10 @@
+FROM quay.io/pabrahamsson/hugo-asciidoctor:0.148.2-1 as BUILDER
+
+USER 1001
+ADD --chown=1001:0 . /blog
+
+RUN hugo
+
 FROM registry.access.redhat.com/ubi10/nginx-126:10.0
 
 LABEL org.opencontainers.image.source https://github.com/pabrahamsson/b42
@@ -6,8 +13,8 @@ LABEL org.opencontainers.image.source https://github.com/pabrahamsson/b42
 #RUN dnf upgrade --refresh -y && \
 #    dnf clean all
 
-USER 1001
-ADD --chown=1001:0 public /tmp/src
+#USER 1001
+COPY --from=BUILDER --chown=1001:0 /blog/public /tmp/src
 
 RUN /usr/libexec/s2i/assemble
 
