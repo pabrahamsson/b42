@@ -1,4 +1,4 @@
-FROM quay.io/pabrahamsson/hugo-asciidoctor:0.148.2-1 as BUILDER
+FROM quay.io/pabrahamsson/hugo-asciidoctor:0.150.1-1@sha256:4f04701b581eecb6aa8a4d8b7b69cc06e84602e63330f03afa1a15d054779f2a as BUILDER
 
 USER 1001
 ADD --chown=1001:0 . /blog
