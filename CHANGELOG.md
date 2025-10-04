@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/pabrahamsson/b42/compare/v0.2.0...v0.3.0) (2025-10-04)
+
+
+### Features
+
+* Terminate TLS and proxy through Anubis ([#14](https://github.com/pabrahamsson/b42/issues/14)) ([7d9eece](https://github.com/pabrahamsson/b42/commit/7d9eece6a371f03b230452d79070b6e6bea5adbb))
+
 ## [0.2.0](https://github.com/pabrahamsson/b42/compare/v0.1.0...v0.2.0) (2025-10-03)
 
 
