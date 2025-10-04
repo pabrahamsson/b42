@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/pabrahamsson/b42/compare/v0.3.0...v0.3.1) (2025-10-04)
+
+
+### Bug Fixes
+
+* Proxy http through anubis ([#16](https://github.com/pabrahamsson/b42/issues/16)) ([c7125e6](https://github.com/pabrahamsson/b42/commit/c7125e618479a8d53d925c5f7aee4d153ba82f3e))
+
 ## [0.3.0](https://github.com/pabrahamsson/b42/compare/v0.2.0...v0.3.0) (2025-10-04)
 
 
