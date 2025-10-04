@@ -9,6 +9,7 @@ LABEL org.opencontainers.image.source https://github.com/pabrahamsson/b42
 
 USER 1001
 COPY --from=BUILDER --chown=1001:0 /blog/public /tmp/src
+COPY --chown=1001:0 ./nginx.conf /tmp/src/nginx.conf
 RUN /usr/libexec/s2i/assemble
 
 CMD /usr/libexec/s2i/run
