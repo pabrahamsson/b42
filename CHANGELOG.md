@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/pabrahamsson/b42/compare/v0.3.1...v0.3.2) (2025-10-04)
+
+
+### Bug Fixes
+
+* Use 8082 for http backend ([#18](https://github.com/pabrahamsson/b42/issues/18)) ([e89675c](https://github.com/pabrahamsson/b42/commit/e89675c391fbfbdc3211ddd92f9c408bf93566b8))
+
 ## [0.3.1](https://github.com/pabrahamsson/b42/compare/v0.3.0...v0.3.1) (2025-10-04)
 
 
