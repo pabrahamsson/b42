@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/pabrahamsson/b42/compare/v0.3.2...v0.3.3) (2025-10-17)
+
+
+### Bug Fixes
+
+* Cleanup API doc ([#21](https://github.com/pabrahamsson/b42/issues/21)) ([8a5787d](https://github.com/pabrahamsson/b42/commit/8a5787d3fa4e66998b17cddf595e5a264e118b33))
+
 ## [0.3.2](https://github.com/pabrahamsson/b42/compare/v0.3.1...v0.3.2) (2025-10-04)
 
 
