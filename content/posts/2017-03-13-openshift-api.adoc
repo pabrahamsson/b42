@@ -29,7 +29,7 @@ User account
 $ oc login -u user1 https://<ose-master>:8443
 $ oc whoami -t > token.txt
 $ cat token.txt
-YrxrxRxiZOGRXCyBhWrWvqly7NsOY0T0du2jpRHqzA
+***REMOVED***
 ----
 
 Service account
