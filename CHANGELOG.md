@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4](https://github.com/pabrahamsson/b42/compare/v0.3.3...v0.3.4) (2025-12-16)
+
+
+### Bug Fixes
+
+* **nginx:** Set 404 page ([#51](https://github.com/pabrahamsson/b42/issues/51)) ([81e1526](https://github.com/pabrahamsson/b42/commit/81e1526b623a0901d2f5457a810b97622191ba01))
+
 ## [0.3.3](https://github.com/pabrahamsson/b42/compare/v0.3.2...v0.3.3) (2025-10-17)
 
 
