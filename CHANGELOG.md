@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.5](https://github.com/pabrahamsson/b42/compare/v0.3.4...v0.3.5) (2025-12-16)
+
+
+### Bug Fixes
+
+* **nginx:** Add missing semi colon ([#53](https://github.com/pabrahamsson/b42/issues/53)) ([3c91783](https://github.com/pabrahamsson/b42/commit/3c9178367c7a726ab6fe38b66fe0b5c687718bb5))
+
 ## [0.3.4](https://github.com/pabrahamsson/b42/compare/v0.3.3...v0.3.4) (2025-12-16)
 
 
