@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.6](https://github.com/pabrahamsson/b42/compare/v0.3.5...v0.3.6) (2025-12-31)
+
+
+### Bug Fixes
+
+* Use major.minor-ts build tags ([#62](https://github.com/pabrahamsson/b42/issues/62)) ([459d96c](https://github.com/pabrahamsson/b42/commit/459d96cac8425891c0235c6db4481736fb7c8570))
+
 ## [0.3.5](https://github.com/pabrahamsson/b42/compare/v0.3.4...v0.3.5) (2025-12-16)
 
 
