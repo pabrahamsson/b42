@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/pabrahamsson/b42/compare/v0.3.6...v0.4.0) (2026-04-29)
+
+
+### Features
+
+* Switch to Nginx image from Project Hummingbird ([#91](https://github.com/pabrahamsson/b42/issues/91)) ([472a011](https://github.com/pabrahamsson/b42/commit/472a011b5820488e0d03795490f8a5a71c5d3256))
+
 ## [0.3.6](https://github.com/pabrahamsson/b42/compare/v0.3.5...v0.3.6) (2025-12-31)
 
 
