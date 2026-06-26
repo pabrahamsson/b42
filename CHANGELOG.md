@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/pabrahamsson/b42/compare/v0.4.0...v0.4.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* **renovate:** Use 'fix' commit type ([#123](https://github.com/pabrahamsson/b42/issues/123)) ([0c787e8](https://github.com/pabrahamsson/b42/commit/0c787e82f4d347d30916356e427a9eed2d743ede))
+
 ## [0.4.0](https://github.com/pabrahamsson/b42/compare/v0.3.6...v0.4.0) (2026-04-29)
 
 
