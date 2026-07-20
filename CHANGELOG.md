@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/pabrahamsson/b42/compare/v0.4.4...v0.4.5) (2026-07-20)
+
+
+### Bug Fixes
+
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 6bc40ef ([#132](https://github.com/pabrahamsson/b42/issues/132)) ([2a34899](https://github.com/pabrahamsson/b42/commit/2a34899e1d54555ad59e88e5e4a75ddc679bf157))
+
 ## [0.4.4](https://github.com/pabrahamsson/b42/compare/v0.4.3...v0.4.4) (2026-07-04)
 
 
