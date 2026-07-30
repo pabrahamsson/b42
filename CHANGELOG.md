@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.5.0](https://github.com/pabrahamsson/b42/compare/v0.4.11...v0.5.0) (2026-07-30)
+
+
+### Features
+
+* **b42:** Enable PAC + renovate ([6d0d9c7](https://github.com/pabrahamsson/b42/commit/6d0d9c795b5740c99a9381d26bd82d734805ede5))
+* Switch to Nginx image from Project Hummingbird ([#91](https://github.com/pabrahamsson/b42/issues/91)) ([472a011](https://github.com/pabrahamsson/b42/commit/472a011b5820488e0d03795490f8a5a71c5d3256))
+* Terminate TLS and proxy through Anubis ([#14](https://github.com/pabrahamsson/b42/issues/14)) ([2157043](https://github.com/pabrahamsson/b42/commit/2157043333fb4fa8c96e406f3ea265c3e749e50c))
+* Use multistage build ([#5](https://github.com/pabrahamsson/b42/issues/5)) ([d8d564a](https://github.com/pabrahamsson/b42/commit/d8d564ae98a3602d31fe573407307cda0296e7af))
+
+
+### Bug Fixes
+
+* **ci:** Setup release please ([#8](https://github.com/pabrahamsson/b42/issues/8)) ([64136c6](https://github.com/pabrahamsson/b42/commit/64136c632dfd2586166957ab26c95a2608b7a235))
+* Cleanup API doc ([#21](https://github.com/pabrahamsson/b42/issues/21)) ([8a5787d](https://github.com/pabrahamsson/b42/commit/8a5787d3fa4e66998b17cddf595e5a264e118b33))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 0254744 ([#127](https://github.com/pabrahamsson/b42/issues/127)) ([5bbcea8](https://github.com/pabrahamsson/b42/commit/5bbcea8d9384533462a3b8bf5ee43a6d151776f3))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 03fdc8a ([#141](https://github.com/pabrahamsson/b42/issues/141)) ([9b99f21](https://github.com/pabrahamsson/b42/commit/9b99f217eb98cd266e0a4286f4260e568a89deb7))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 387f627 ([#137](https://github.com/pabrahamsson/b42/issues/137)) ([d4e722c](https://github.com/pabrahamsson/b42/commit/d4e722cba56ccf3c605738e946b2f3b964798732))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 3b1c6ed ([#148](https://github.com/pabrahamsson/b42/issues/148)) ([8ffe068](https://github.com/pabrahamsson/b42/commit/8ffe068ac39cc49a66d6c7d893524151563c52d1))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 6254920 ([#139](https://github.com/pabrahamsson/b42/issues/139)) ([7194a88](https://github.com/pabrahamsson/b42/commit/7194a88367d333fd98c3a747830872022c8ed6f8))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 6a75423 ([#129](https://github.com/pabrahamsson/b42/issues/129)) ([d860275](https://github.com/pabrahamsson/b42/commit/d86027557e8026792fc0a2b453ccf2d9a09e0b7d))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 6bc40ef ([#132](https://github.com/pabrahamsson/b42/issues/132)) ([2a34899](https://github.com/pabrahamsson/b42/commit/2a34899e1d54555ad59e88e5e4a75ddc679bf157))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 6ce6d75 ([#146](https://github.com/pabrahamsson/b42/issues/146)) ([2bd5d33](https://github.com/pabrahamsson/b42/commit/2bd5d3361ab7b22cb65ea21d2fcd315aa69f6c1a))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 936dcfb ([#136](https://github.com/pabrahamsson/b42/issues/136)) ([48fb28b](https://github.com/pabrahamsson/b42/commit/48fb28bfca0c01eac676fe5eb79d20107789ad0a))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 9cac76e ([#131](https://github.com/pabrahamsson/b42/issues/131)) ([49c8b81](https://github.com/pabrahamsson/b42/commit/49c8b81f62ed1a86917fd36d4579b2ba7f0bbc30))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 9d2390b ([#125](https://github.com/pabrahamsson/b42/issues/125)) ([bfa8be3](https://github.com/pabrahamsson/b42/commit/bfa8be3964ae8118315726a91aecc88dffd83a4b))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to cfecd5f ([#134](https://github.com/pabrahamsson/b42/issues/134)) ([3b9b7f8](https://github.com/pabrahamsson/b42/commit/3b9b7f804c58cea8846ddc56befc8506fc8d25f5))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to d838ed8 ([#144](https://github.com/pabrahamsson/b42/issues/144)) ([1a19786](https://github.com/pabrahamsson/b42/commit/1a19786e8340df3a9682c2ddfcd643424987e752))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor docker tag to v0.164 ([#143](https://github.com/pabrahamsson/b42/issues/143)) ([e867513](https://github.com/pabrahamsson/b42/commit/e867513e79930c32f6e78e189d92e670ba9ecbf1))
+* **nginx:** Add missing semi colon ([#53](https://github.com/pabrahamsson/b42/issues/53)) ([3c91783](https://github.com/pabrahamsson/b42/commit/3c9178367c7a726ab6fe38b66fe0b5c687718bb5))
+* **nginx:** Set 404 page ([#51](https://github.com/pabrahamsson/b42/issues/51)) ([81e1526](https://github.com/pabrahamsson/b42/commit/81e1526b623a0901d2f5457a810b97622191ba01))
+* Proxy http through anubis ([#16](https://github.com/pabrahamsson/b42/issues/16)) ([afa01bf](https://github.com/pabrahamsson/b42/commit/afa01bf1a27d376439acbb5b26f39532b7cbc8b8))
+* **renovate:** Use 'fix' commit type ([#123](https://github.com/pabrahamsson/b42/issues/123)) ([0c787e8](https://github.com/pabrahamsson/b42/commit/0c787e82f4d347d30916356e427a9eed2d743ede))
+* Use 8082 for http backend ([#18](https://github.com/pabrahamsson/b42/issues/18)) ([48f2690](https://github.com/pabrahamsson/b42/commit/48f269094d16677d1f98feb1984692dc964a2494))
+* Use major.minor-ts build tags ([#62](https://github.com/pabrahamsson/b42/issues/62)) ([459d96c](https://github.com/pabrahamsson/b42/commit/459d96cac8425891c0235c6db4481736fb7c8570))
+
 ## [0.4.11](https://github.com/pabrahamsson/b42/compare/v0.4.10...v0.4.11) (2026-07-30)
 
 
