@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.2](https://github.com/pabrahamsson/b42/compare/v0.5.1...v0.5.2) (2026-09-25)
+
+
+### Bug Fixes
+
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 36ece51 ([#152](https://github.com/pabrahamsson/b42/issues/152)) ([f86aec5](https://github.com/pabrahamsson/b42/commit/f86aec5ab230e2e478e19cb4352065fc7cf685b7))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 3efe0de ([#155](https://github.com/pabrahamsson/b42/issues/155)) ([64a083c](https://github.com/pabrahamsson/b42/commit/64a083cf3ee8acab652d56ebc6558a1d5dd3c44c))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 76f7ebe ([#157](https://github.com/pabrahamsson/b42/issues/157)) ([10de09e](https://github.com/pabrahamsson/b42/commit/10de09e027782063bbc1bdad46cc5ecb7e01c548))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to b1a78d4 ([#163](https://github.com/pabrahamsson/b42/issues/163)) ([aaa3f52](https://github.com/pabrahamsson/b42/commit/aaa3f522d64a7c694ca861b0a11e81d5922ccae8))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to d35cbf4 ([#160](https://github.com/pabrahamsson/b42/issues/160)) ([20f91b0](https://github.com/pabrahamsson/b42/commit/20f91b00f5bc01be490f051a67608e3523ac387e))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to ea3f075 ([#162](https://github.com/pabrahamsson/b42/issues/162)) ([af82609](https://github.com/pabrahamsson/b42/commit/af8260958472d6c5028feafa3f652ab57858dea2))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor docker tag to v0.165 ([#154](https://github.com/pabrahamsson/b42/issues/154)) ([27f390c](https://github.com/pabrahamsson/b42/commit/27f390c563cb712d695b1f5555ac6aec74e3a6a6))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor docker tag to v0.166 ([#159](https://github.com/pabrahamsson/b42/issues/159)) ([e584273](https://github.com/pabrahamsson/b42/commit/e584273c848c50438e8ef10cda869b88276d2ae9))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.164 docker digest to 743325b ([#153](https://github.com/pabrahamsson/b42/issues/153)) ([387afa1](https://github.com/pabrahamsson/b42/commit/387afa10daa8db401ea5ffee56bbf4699900cc63))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.165 docker digest to 3ddc82f ([#158](https://github.com/pabrahamsson/b42/issues/158)) ([dad737e](https://github.com/pabrahamsson/b42/commit/dad737e983bcc3b9893451a70c968e5a7b689a49))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.165 docker digest to 8a9a9a4 ([#156](https://github.com/pabrahamsson/b42/issues/156)) ([351f61c](https://github.com/pabrahamsson/b42/commit/351f61c2ad9261666f0372e08a81c09f03fd1249))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.166 docker digest to 3290719 ([#164](https://github.com/pabrahamsson/b42/issues/164)) ([4f5022c](https://github.com/pabrahamsson/b42/commit/4f5022ca08c56b37aa9dd5ca27c9a198f6546630))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.166 docker digest to 45bdddd ([#161](https://github.com/pabrahamsson/b42/issues/161)) ([0c91b4b](https://github.com/pabrahamsson/b42/commit/0c91b4b98a2b58b93442549030cb24a4db04dd6a))
+
 ## [0.5.1](https://github.com/pabrahamsson/b42/compare/v0.5.0...v0.5.1) (2026-08-03)
 
 
