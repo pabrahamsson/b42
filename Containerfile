@@ -1,4 +1,4 @@
-FROM quay.io/pabrahamsson/hugo-asciidoctor:0.167@sha256:3928ab7dd907a13850f7f63b4f18486d028343a5cf7e7d3b58173064425ef951 as BUILDER
+FROM quay.io/pabrahamsson/hugo-asciidoctor:0.167@sha256:2753eaaaace8e0eafa7fbe788e015f607c370af6bd17d4824217f1556991cadb as BUILDER
 
 ADD . /blog
 RUN hugo
