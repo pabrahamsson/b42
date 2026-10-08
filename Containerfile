@@ -3,7 +3,7 @@ FROM quay.io/pabrahamsson/hugo-asciidoctor:0.167@sha256:2753eaaaace8e0eafa7fbe78
 ADD . /blog
 RUN hugo
 
-FROM quay.io/hummingbird/nginx:1.30@sha256:e793ca0c2be85e5113b8732248b8100a795f412374434af36fd4cf665e32764b
+FROM quay.io/hummingbird/nginx:1.30@sha256:7c88ec5f1177a2ab937e3fb99c3e42c367c629a7632e5c90a9dc607a9e4d1dcc
 
 LABEL org.opencontainers.image.source https://github.com/pabrahamsson/b42
 
