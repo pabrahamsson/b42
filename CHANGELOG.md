@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.8](https://github.com/pabrahamsson/b42/compare/v0.5.7...v0.5.8) (2026-10-13)
+
+
+### Bug Fixes
+
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.167 docker digest to c590dc1 ([#180](https://github.com/pabrahamsson/b42/issues/180)) ([799265d](https://github.com/pabrahamsson/b42/commit/799265d944651ce40e4ce1a3b88b89b517ac8b5d))
+
 ## [0.5.7](https://github.com/pabrahamsson/b42/compare/v0.5.6...v0.5.7) (2026-10-12)
 
 
