@@ -5,6 +5,7 @@
 
 ### Bug Fixes
 
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 634cd17 ([#181](https://github.com/pabrahamsson/b42/issues/181)) ([050d6e5](https://github.com/pabrahamsson/b42/commit/050d6e50d59698bd549e4270084f9a1c523330bd))
 * **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.167 docker digest to c590dc1 ([#180](https://github.com/pabrahamsson/b42/issues/180)) ([799265d](https://github.com/pabrahamsson/b42/commit/799265d944651ce40e4ce1a3b88b89b517ac8b5d))
 
 ## [0.5.7](https://github.com/pabrahamsson/b42/compare/v0.5.6...v0.5.7) (2026-10-12)
