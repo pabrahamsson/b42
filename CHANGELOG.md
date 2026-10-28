@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.10](https://github.com/pabrahamsson/b42/compare/v0.5.9...v0.5.10) (2026-10-28)
+
+
+### Bug Fixes
+
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 8c67b09 ([#188](https://github.com/pabrahamsson/b42/issues/188)) ([67ae5c2](https://github.com/pabrahamsson/b42/commit/67ae5c296a3ff61fc06c1598c715e7bb55126e6d))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor docker tag to v0.169 ([#191](https://github.com/pabrahamsson/b42/issues/191)) ([b5d1510](https://github.com/pabrahamsson/b42/commit/b5d151033bae6970baf009fb20e91b98d2167b98))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.168 docker digest to ea39b95 ([#190](https://github.com/pabrahamsson/b42/issues/190)) ([10cd534](https://github.com/pabrahamsson/b42/commit/10cd534f5e20743b68119329f5ccab6f7762ea8a))
+
 ## [0.5.9](https://github.com/pabrahamsson/b42/compare/v0.5.8...v0.5.9) (2026-10-22)
 
 
