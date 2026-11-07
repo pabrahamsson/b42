@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.11](https://github.com/pabrahamsson/b42/compare/v0.5.10...v0.5.11) (2026-11-07)
+
+
+### Bug Fixes
+
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.169 docker digest to e332760 ([#193](https://github.com/pabrahamsson/b42/issues/193)) ([8e1b66c](https://github.com/pabrahamsson/b42/commit/8e1b66cabf64dbddaa16a8c579a641635cb4c46e))
+* **deps:** update quay.io/pabrahamsson/hugo-asciidoctor:0.169 docker digest to ed0a0d5 ([#194](https://github.com/pabrahamsson/b42/issues/194)) ([74f82f5](https://github.com/pabrahamsson/b42/commit/74f82f5be4c0799e2ed81f81d9682001eb3ffd71))
+
 ## [0.5.10](https://github.com/pabrahamsson/b42/compare/v0.5.9...v0.5.10) (2026-10-28)
 
 
