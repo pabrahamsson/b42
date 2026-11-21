@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.16](https://github.com/pabrahamsson/b42/compare/v0.5.15...v0.5.16) (2026-11-21)
+
+
+### Bug Fixes
+
+* Disable http2 ([#210](https://github.com/pabrahamsson/b42/issues/210)) ([204546d](https://github.com/pabrahamsson/b42/commit/204546d273a27a0294637abd9237cec6bdb5e462))
+
 ## [0.5.15](https://github.com/pabrahamsson/b42/compare/v0.5.14...v0.5.15) (2026-11-21)
 
 
