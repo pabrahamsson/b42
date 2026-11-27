@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.20](https://github.com/pabrahamsson/b42/compare/v0.5.19...v0.5.20) (2026-11-27)
+
+
+### Bug Fixes
+
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to 109db60 ([#221](https://github.com/pabrahamsson/b42/issues/221)) ([bf76821](https://github.com/pabrahamsson/b42/commit/bf76821d4e7946e7e293725f7fa9a821627b2c67))
+* **deps:** update quay.io/hummingbird/nginx:1.30 docker digest to b1bbfdd ([#220](https://github.com/pabrahamsson/b42/issues/220)) ([1fdc4f0](https://github.com/pabrahamsson/b42/commit/1fdc4f0c81ca4ae96a36e262ab62b80078a78017))
+
 ## [0.5.19](https://github.com/pabrahamsson/b42/compare/v0.5.18...v0.5.19) (2026-11-26)
 
 
